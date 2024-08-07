@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn test_bits_to_add_imm() {
-        // ADD  R3, R2, 31
+        // ADD  R3, R2, 1
         let bits = 0b0001_011_010_1_00001;
 
         let instruction = Add::from_bits(bits);

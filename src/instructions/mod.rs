@@ -1,3 +1,7 @@
+mod add;
+
+pub use add::Add;
+
 use crate::{memory::Memory, registers::Registers};
 
 pub trait Instruction {

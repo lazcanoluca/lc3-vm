@@ -47,9 +47,11 @@ impl Instruction for Add {
         match self {
             Add::AddImm(args) => {
                 registers.set(args.dr, registers.get(args.sr1) + args.imm5);
+                registers.update_flags(args.dr);
             }
             Add::AddReg(args) => {
                 registers.set(args.dr, registers.get(args.sr1) + registers.get(args.sr2));
+                registers.update_flags(args.dr);
             }
         }
     }

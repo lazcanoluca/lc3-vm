@@ -1,7 +1,7 @@
 use crate::{
     memory::Memory,
     registers::{Register, Registers},
-    sign_extend,
+    utils::sign_extend,
 };
 
 use super::Instruction;

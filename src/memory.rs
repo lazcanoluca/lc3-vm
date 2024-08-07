@@ -1,16 +1,24 @@
 use crate::constants::MEMORY_MAX;
 
-pub struct Memory([u16; MEMORY_MAX as usize]);
+pub struct Memory {
+    memory: [u16; MEMORY_MAX as usize],
+}
 
 impl Memory {
     pub fn read(&self, addr: u16) -> u16 {
-        todo!()
+        self.memory.get(addr as usize).unwrap().clone()
+    }
+
+    pub fn write(&mut self, addr: u16, data: u16) {
+        *self.memory.get_mut(addr as usize).unwrap() = data;
     }
 }
 
 impl Default for Memory {
     fn default() -> Self {
-        Self([0; MEMORY_MAX as usize])
+        Self {
+            memory: [0; MEMORY_MAX as usize],
+        }
     }
 }
 
@@ -22,6 +30,24 @@ mod tests {
     fn test_default_memory() {
         let memory = Memory::default();
 
-        assert_eq!(memory.0.len(), MEMORY_MAX as usize);
+        assert_eq!(memory.memory.len(), MEMORY_MAX as usize);
+    }
+
+    #[test]
+    fn test_read_memory() {
+        let mut memory = Memory::default();
+
+        memory.memory[0x3000] = 0xABCD;
+
+        assert_eq!(memory.read(0x3000), 0xABCD);
+    }
+
+    #[test]
+    fn test_write_memory() {
+        let mut memory = Memory::default();
+
+        memory.write(0x3000, 0xABCD);
+
+        assert_eq!(memory.read(0x3000), 0xABCD);
     }
 }

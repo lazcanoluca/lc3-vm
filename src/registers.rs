@@ -77,8 +77,14 @@ impl Registers {
         };
     }
 
-    pub fn update_flags(&self, r: u16) {
-        todo!()
+    pub fn update_flags(&mut self, register: Register) {
+        let flag = match self.get(register) {
+            0 => CondFlag::ZRO,
+            x if x >> 15 == 1 => CondFlag::NEG,
+            _ => CondFlag::POS,
+        };
+
+        self.set(Register::COND, flag as u16);
     }
 
     pub fn program_counter_increment(&mut self) {
@@ -86,8 +92,16 @@ impl Registers {
     }
 }
 
+enum CondFlag {
+    POS = 1 << 0 as u16,
+    ZRO = 1 << 1 as u16,
+    NEG = 1 << 2 as u16,
+}
+
 #[cfg(test)]
 mod tests {
+    use std::u16;
+
     use super::*;
 
     #[test]
@@ -136,5 +150,22 @@ mod tests {
 
         assert_eq!(registers.get(Register::R5), 5);
         assert_eq!(registers.get(Register::R7), 7);
+    }
+
+    #[test]
+    fn test_flag_update() {
+        let mut registers = Registers::default();
+
+        registers.set(Register::R0, u16::MAX);
+        registers.update_flags(Register::R0);
+        assert_eq!(registers.get(Register::COND), CondFlag::NEG as u16);
+
+        registers.set(Register::R0, 0);
+        registers.update_flags(Register::R0);
+        assert_eq!(registers.get(Register::COND), CondFlag::ZRO as u16);
+
+        registers.set(Register::R0, 10);
+        registers.update_flags(Register::R0);
+        assert_eq!(registers.get(Register::COND), CondFlag::POS as u16);
     }
 }

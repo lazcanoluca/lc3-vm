@@ -1,11 +1,14 @@
 mod add;
+mod br;
 
 pub use add::Add;
+pub use br::Br;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
 pub enum Instruction {
     Add(Add),
+    Br(Br),
 }
 
 impl Instruction {
@@ -14,6 +17,7 @@ impl Instruction {
 
         match opcode {
             Opcode::ADD => Ok(Self::Add(Add::from_bits(bits))),
+            Opcode::BR => Ok(Self::Br(Br::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -21,6 +25,7 @@ impl Instruction {
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         match self {
             Instruction::Add(x) => x.execute(registers, memory),
+            Instruction::Br(x) => x.execute(registers),
             _ => todo!(),
         }
     }

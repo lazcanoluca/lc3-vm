@@ -1,7 +1,7 @@
 use crate::constants::MEMORY_MAX;
 
 pub struct Memory {
-    memory: [u16; MEMORY_MAX as usize],
+    memory: [u16; MEMORY_MAX as usize + 1],
 }
 
 impl Memory {
@@ -17,7 +17,7 @@ impl Memory {
 impl Default for Memory {
     fn default() -> Self {
         Self {
-            memory: [0; MEMORY_MAX as usize],
+            memory: [0; MEMORY_MAX as usize + 1],
         }
     }
 }
@@ -30,7 +30,7 @@ mod tests {
     fn test_default_memory() {
         let memory = Memory::default();
 
-        assert_eq!(memory.memory.len(), MEMORY_MAX as usize);
+        assert_eq!(memory.memory.len(), MEMORY_MAX as usize + 1);
     }
 
     #[test]
@@ -49,5 +49,12 @@ mod tests {
         memory.write(0x3000, 0xABCD);
 
         assert_eq!(memory.read(0x3000), 0xABCD);
+    }
+
+    #[test]
+    fn test_index_last_memory_block() {
+        let memory = Memory::default();
+
+        assert_eq!(memory.read(0xffff), 0);
     }
 }

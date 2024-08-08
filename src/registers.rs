@@ -92,10 +92,24 @@ impl Registers {
     }
 }
 
-enum CondFlag {
+#[derive(PartialEq)]
+pub enum CondFlag {
     POS = 1 << 0 as u16,
     ZRO = 1 << 1 as u16,
     NEG = 1 << 2 as u16,
+}
+
+impl TryFrom<u16> for CondFlag {
+    type Error = String;
+
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        match value {
+            value if value == (1 << 0) => Ok(CondFlag::POS),
+            value if value == (1 << 1) => Ok(CondFlag::ZRO),
+            value if value == (1 << 2) => Ok(CondFlag::NEG),
+            _ => Err(format!("{} is not a condition flag.", value).to_owned()),
+        }
+    }
 }
 
 #[cfg(test)]

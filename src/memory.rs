@@ -6,11 +6,11 @@ pub struct Memory {
 
 impl Memory {
     pub fn read(&self, addr: u16) -> u16 {
-        self.memory.get(addr as usize).unwrap().clone()
+        self.memory[addr as usize]
     }
 
     pub fn write(&mut self, addr: u16, data: u16) {
-        *self.memory.get_mut(addr as usize).unwrap() = data;
+        self.memory[addr as usize] = data;
     }
 }
 

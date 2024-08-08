@@ -1,7 +1,6 @@
 use crate::{
-    instructions::{Add, Instruction},
+    instructions::Instruction,
     memory::Memory,
-    opcodes::Opcode,
     registers::{Register, Registers},
 };
 
@@ -22,19 +21,15 @@ impl VM {
         self.memory.read(mar)
     }
 
-    fn decode(&self, bits: u16) -> Box<dyn Instruction> {
-        let opcode = Opcode::try_from(bits).unwrap();
-
-        match opcode {
-            Opcode::ADD => Box::new(Add::from_bits(bits)),
-            _ => todo!(),
-        }
-    }
-
     pub fn instruction_cycle(&mut self) {
-        let bits = self.fetch();
-        let instruction = self.decode(bits);
-        instruction.execute(&mut self.registers, &mut self.memory);
+        loop {
+            // 1. Fetch
+            let bits = self.fetch();
+            // 2. Decode
+            let instruction = Instruction::try_from_bits(bits).unwrap();
+            // 3. Execute
+            instruction.execute(&mut self.registers, &mut self.memory);
+        }
     }
 }
 
@@ -61,13 +56,13 @@ mod tests {
         let fetched = vm.fetch();
         assert_eq!(fetched, i1);
         assert_eq!(vm.registers.get(Register::PC), 0x3001);
-        let instruction = vm.decode(fetched);
+        let instruction = Instruction::try_from_bits(fetched).unwrap();
         assert_eq!(vm.registers.get(Register::R0), 0);
         instruction.execute(&mut vm.registers, &mut vm.memory);
         assert_eq!(vm.registers.get(Register::R0), 1);
         let fetched = vm.fetch();
         assert_eq!(fetched, i2);
-        let instruction = vm.decode(fetched);
+        let instruction = Instruction::try_from_bits(fetched).unwrap();
         instruction.execute(&mut vm.registers, &mut vm.memory);
         assert_eq!(vm.registers.get(Register::R0), 2);
     }

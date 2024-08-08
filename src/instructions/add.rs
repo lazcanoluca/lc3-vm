@@ -4,8 +4,6 @@ use crate::{
     utils::sign_extend,
 };
 
-use super::Instruction;
-
 pub struct AddImmediate {
     dr: Register,
     sr1: Register,
@@ -23,11 +21,8 @@ pub enum Add {
     AddReg(AddRegister),
 }
 
-impl Instruction for Add {
-    fn from_bits(bits: u16) -> Self
-    where
-        Self: Sized,
-    {
+impl Add {
+    pub fn from_bits(bits: u16) -> Self {
         let dr = Register::try_from((bits >> 9) & 0b111).unwrap();
         let sr1 = Register::try_from((bits >> 6) & 0b111).unwrap();
         let imm = (bits >> 5) & 0b1 == 1;
@@ -43,7 +38,7 @@ impl Instruction for Add {
         }
     }
 
-    fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
+    pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         match self {
             Add::AddImm(args) => {
                 registers.set(args.dr, registers.get(args.sr1) + args.imm5);

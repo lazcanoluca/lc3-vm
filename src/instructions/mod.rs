@@ -2,11 +2,13 @@ mod add;
 mod br;
 mod jmp;
 mod jsr;
+mod ld;
 
 pub use add::Add;
 pub use br::Br;
 pub use jmp::Jmp;
 pub use jsr::Jsr;
+pub use ld::Ld;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
@@ -15,6 +17,7 @@ pub enum Instruction {
     Br(Br),
     Jmp(Jmp),
     Jsr(Jsr),
+    Ld(Ld),
 }
 
 impl Instruction {
@@ -26,6 +29,7 @@ impl Instruction {
             Opcode::BR => Ok(Self::Br(Br::from_bits(bits))),
             Opcode::JMP => Ok(Self::Jmp(Jmp::from_bits(bits))),
             Opcode::JSR => Ok(Self::Jsr(Jsr::from_bits(bits))),
+            Opcode::LD => Ok(Self::Ld(Ld::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -36,6 +40,7 @@ impl Instruction {
             Instruction::Br(x) => x.execute(registers),
             Instruction::Jmp(x) => x.execute(registers),
             Instruction::Jsr(x) => x.execute(registers),
+            Instruction::Ld(x) => x.execute(registers, memory),
             _ => todo!(),
         }
     }

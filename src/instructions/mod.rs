@@ -5,6 +5,7 @@ mod jsr;
 mod ld;
 mod ldi;
 mod ldr;
+mod lea;
 
 pub use add::Add;
 pub use br::Br;
@@ -13,6 +14,7 @@ pub use jsr::Jsr;
 pub use ld::Ld;
 pub use ldi::Ldi;
 pub use ldr::Ldr;
+pub use lea::Lea;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
@@ -24,6 +26,7 @@ pub enum Instruction {
     Ld(Ld),
     Ldi(Ldi),
     Ldr(Ldr),
+    Lea(Lea),
 }
 
 impl Instruction {
@@ -38,6 +41,7 @@ impl Instruction {
             Opcode::LD => Ok(Self::Ld(Ld::from_bits(bits))),
             Opcode::LDI => Ok(Self::Ldi(Ldi::from_bits(bits))),
             Opcode::LDR => Ok(Self::Ldr(Ldr::from_bits(bits))),
+            Opcode::LEA => Ok(Self::Lea(Lea::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -51,6 +55,7 @@ impl Instruction {
             Instruction::Ld(x) => x.execute(registers, memory),
             Instruction::Ldi(x) => x.execute(registers, memory),
             Instruction::Ldr(x) => x.execute(registers, memory),
+            Instruction::Lea(x) => x.execute(registers),
             _ => todo!(),
         }
     }

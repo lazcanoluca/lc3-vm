@@ -7,6 +7,7 @@ mod ldi;
 mod ldr;
 mod lea;
 mod not;
+mod st;
 
 pub use add::Add;
 pub use br::Br;
@@ -17,6 +18,7 @@ pub use ldi::Ldi;
 pub use ldr::Ldr;
 pub use lea::Lea;
 pub use not::Not;
+pub use st::St;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
@@ -30,6 +32,7 @@ pub enum Instruction {
     Ldr(Ldr),
     Lea(Lea),
     Not(Not),
+    St(St),
 }
 
 impl Instruction {
@@ -46,6 +49,7 @@ impl Instruction {
             Opcode::LDR => Ok(Self::Ldr(Ldr::from_bits(bits))),
             Opcode::LEA => Ok(Self::Lea(Lea::from_bits(bits))),
             Opcode::NOT => Ok(Self::Not(Not::from_bits(bits))),
+            Opcode::ST => Ok(Self::St(St::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -60,6 +64,8 @@ impl Instruction {
             Instruction::Ldi(x) => x.execute(registers, memory),
             Instruction::Ldr(x) => x.execute(registers, memory),
             Instruction::Lea(x) => x.execute(registers),
+            Instruction::Not(x) => x.execute(registers),
+            Instruction::St(x) => x.execute(registers, memory),
             _ => todo!(),
         }
     }

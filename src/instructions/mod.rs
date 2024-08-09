@@ -4,13 +4,15 @@ mod jmp;
 mod jsr;
 mod ld;
 mod ldi;
+mod ldr;
 
 pub use add::Add;
 pub use br::Br;
 pub use jmp::Jmp;
 pub use jsr::Jsr;
 pub use ld::Ld;
-use ldi::Ldi;
+pub use ldi::Ldi;
+pub use ldr::Ldr;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
@@ -21,6 +23,7 @@ pub enum Instruction {
     Jsr(Jsr),
     Ld(Ld),
     Ldi(Ldi),
+    Ldr(Ldr),
 }
 
 impl Instruction {
@@ -34,6 +37,7 @@ impl Instruction {
             Opcode::JSR => Ok(Self::Jsr(Jsr::from_bits(bits))),
             Opcode::LD => Ok(Self::Ld(Ld::from_bits(bits))),
             Opcode::LDI => Ok(Self::Ldi(Ldi::from_bits(bits))),
+            Opcode::LDR => Ok(Self::Ldr(Ldr::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -46,6 +50,7 @@ impl Instruction {
             Instruction::Jsr(x) => x.execute(registers),
             Instruction::Ld(x) => x.execute(registers, memory),
             Instruction::Ldi(x) => x.execute(registers, memory),
+            Instruction::Ldr(x) => x.execute(registers, memory),
             _ => todo!(),
         }
     }

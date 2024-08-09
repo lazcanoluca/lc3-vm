@@ -9,6 +9,7 @@ mod lea;
 mod not;
 mod st;
 mod sti;
+mod str;
 
 pub use add::Add;
 pub use br::Br;
@@ -21,6 +22,7 @@ pub use lea::Lea;
 pub use not::Not;
 pub use st::St;
 pub use sti::Sti;
+pub use str::Str;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
@@ -36,6 +38,7 @@ pub enum Instruction {
     Not(Not),
     St(St),
     Sti(Sti),
+    Str(Str),
 }
 
 impl Instruction {
@@ -54,6 +57,7 @@ impl Instruction {
             Opcode::NOT => Ok(Self::Not(Not::from_bits(bits))),
             Opcode::ST => Ok(Self::St(St::from_bits(bits))),
             Opcode::STI => Ok(Self::Sti(Sti::from_bits(bits))),
+            Opcode::STR => Ok(Self::Str(Str::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -71,6 +75,7 @@ impl Instruction {
             Instruction::Not(x) => x.execute(registers),
             Instruction::St(x) => x.execute(registers, memory),
             Instruction::Sti(x) => x.execute(registers, memory),
+            Instruction::Str(x) => x.execute(registers, memory),
             _ => todo!(),
         }
     }

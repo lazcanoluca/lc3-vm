@@ -8,10 +8,9 @@ use std::{
 use byteorder::{BigEndian, ReadBytesExt};
 use memory::Memory;
 use registers::Registers;
-use termios::{
-    tcsetattr, Termios, BRKINT, ECHO, ICANON, ICRNL, IGNBRK, IGNCR, INLCR, ISTRIP, IXON, PARMRK,
-    TCSANOW,
-};
+
+use termios::Termios;
+use utils::{restore_terminal, setup_terminal, STDIN};
 use vm::Vm;
 
 mod instructions;
@@ -21,20 +20,6 @@ mod registers;
 mod traps;
 mod utils;
 mod vm;
-
-const STDIN: i32 = 0;
-
-fn setup_terminal(termios: Termios) {
-    let mut new_termios = termios;
-    new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
-    new_termios.c_lflag &= !(ICANON | ECHO);
-
-    tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
-}
-
-fn restore_terminal(termios: Termios) {
-    tcsetattr(STDIN, TCSANOW, &termios).unwrap();
-}
 
 fn main() {
     let args: Vec<String> = env::args().collect();

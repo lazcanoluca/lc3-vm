@@ -32,6 +32,11 @@ impl TryFrom<u16> for Register {
     }
 }
 
+pub enum MemoryMappedReg {
+    Kbsr = 0xFE00,
+    Kbdr = 0xFE02,
+}
+
 #[derive(Default)]
 pub struct Registers {
     r0: u16,

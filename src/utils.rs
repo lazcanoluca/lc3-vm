@@ -1,6 +1,10 @@
 use std::io::Read;
+use termios::{
+    tcsetattr, Termios, BRKINT, ECHO, ICANON, ICRNL, IGNBRK, IGNCR, INLCR, ISTRIP, IXON, PARMRK,
+    TCSANOW,
+};
 
-use crate::memory::Memory;
+use crate::{memory::Memory, registers::MemoryMappedReg};
 
 pub fn sign_extend(mut x: u16, bit_count: u8) -> u16 {
     if (x >> (bit_count - 1)) & 1 != 0 {
@@ -20,9 +24,18 @@ pub fn handle_keyboard(memory: &mut Memory) {
     }
 }
 
-pub enum MemoryMappedReg {
-    Kbsr = 0xFE00,
-    Kbdr = 0xFE02,
+pub const STDIN: i32 = 0;
+
+pub fn setup_terminal(termios: Termios) {
+    let mut new_termios = termios;
+    new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
+    new_termios.c_lflag &= !(ICANON | ECHO);
+
+    tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
+}
+
+pub fn restore_terminal(termios: Termios) {
+    tcsetattr(STDIN, TCSANOW, &termios).unwrap();
 }
 
 #[cfg(test)]

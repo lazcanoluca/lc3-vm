@@ -1,4 +1,4 @@
-use crate::utils::{handle_keyboard, MemoryMappedReg};
+use crate::{registers::MemoryMappedReg, utils::handle_keyboard};
 
 pub const MEMORY_MAX: u16 = u16::MAX;
 

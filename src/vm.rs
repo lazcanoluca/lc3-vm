@@ -4,6 +4,8 @@ use crate::{
     registers::{CondFlag, Register, Registers},
 };
 
+const PC_START: u16 = 0x3000;
+
 pub struct Vm {
     registers: Registers,
     memory: Memory,
@@ -22,7 +24,7 @@ impl Vm {
     }
 
     pub fn instruction_cycle(&mut self) {
-        self.registers.set(Register::PC, 0x3000);
+        self.registers.set(Register::PC, PC_START);
         self.registers.set(Register::COND, CondFlag::ZRO as u16);
 
         loop {

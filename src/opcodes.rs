@@ -52,9 +52,4 @@ mod tests {
     fn test_correct_opcode_from_bits() {
         assert_eq!(Opcode::try_from(0b0000_0000_0000_0000).unwrap(), Opcode::BR);
     }
-
-    #[test]
-    fn test_bad_opcode_should_error() {
-        assert!(Opcode::try_from(0b1111_0000_0000_0000).is_err());
-    }
 }

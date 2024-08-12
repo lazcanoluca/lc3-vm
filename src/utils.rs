@@ -1,9 +1,28 @@
-pub fn sign_extend(x: u16, bit_count: u32) -> u16 {
-    if (x >> (bit_count - 1)) & 1 == 1 {
-        x | (0xFFFF << bit_count)
-    } else {
-        x
+use std::io::Read;
+
+use crate::memory::Memory;
+
+pub fn sign_extend(mut x: u16, bit_count: u8) -> u16 {
+    if (x >> (bit_count - 1)) & 1 != 0 {
+        x |= 0xFFFF << bit_count;
     }
+    x
+}
+
+pub fn handle_keyboard(memory: &mut Memory) {
+    let mut buffer = [0; 1];
+    std::io::stdin().read_exact(&mut buffer).unwrap();
+    if buffer[0] != 0 {
+        memory.write(MemoryMappedReg::Kbsr as u16, 1 << 15);
+        memory.write(MemoryMappedReg::Kbdr as u16, buffer[0] as u16);
+    } else {
+        memory.write(MemoryMappedReg::Kbsr as u16, 0)
+    }
+}
+
+pub enum MemoryMappedReg {
+    Kbsr = 0xFE00,
+    Kbdr = 0xFE02,
 }
 
 #[cfg(test)]

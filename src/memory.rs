@@ -1,11 +1,17 @@
-use crate::constants::MEMORY_MAX;
+use crate::{
+    constants::MEMORY_MAX,
+    utils::{handle_keyboard, MemoryMappedReg},
+};
 
 pub struct Memory {
     memory: [u16; MEMORY_MAX as usize + 1],
 }
 
 impl Memory {
-    pub fn read(&self, addr: u16) -> u16 {
+    pub fn read(&mut self, addr: u16) -> u16 {
+        if addr == MemoryMappedReg::Kbsr as u16 {
+            handle_keyboard(self);
+        }
         self.memory[addr as usize]
     }
 
@@ -53,7 +59,7 @@ mod tests {
 
     #[test]
     fn test_index_last_memory_block() {
-        let memory = Memory::default();
+        let mut memory = Memory::default();
 
         assert_eq!(memory.read(0xffff), 0);
     }

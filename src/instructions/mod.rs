@@ -1,4 +1,5 @@
 mod add;
+mod and;
 mod br;
 mod jmp;
 mod jsr;
@@ -10,8 +11,10 @@ mod not;
 mod st;
 mod sti;
 mod str;
+mod trap;
 
 pub use add::Add;
+pub use and::And;
 pub use br::Br;
 pub use jmp::Jmp;
 pub use jsr::Jsr;
@@ -23,9 +26,11 @@ pub use not::Not;
 pub use st::St;
 pub use sti::Sti;
 pub use str::Str;
+pub use trap::Trap;
 
 use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
 
+#[derive(Debug)]
 pub enum Instruction {
     Add(Add),
     Br(Br),
@@ -39,6 +44,8 @@ pub enum Instruction {
     St(St),
     Sti(Sti),
     Str(Str),
+    Trap(Trap),
+    And(And),
 }
 
 impl Instruction {
@@ -58,6 +65,8 @@ impl Instruction {
             Opcode::ST => Ok(Self::St(St::from_bits(bits))),
             Opcode::STI => Ok(Self::Sti(Sti::from_bits(bits))),
             Opcode::STR => Ok(Self::Str(Str::from_bits(bits))),
+            Opcode::TRAP => Ok(Self::Trap(Trap::from_bits(bits))),
+            Opcode::AND => Ok(Self::And(And::from_bits(bits))),
             _ => todo!(),
         }
     }
@@ -76,7 +85,8 @@ impl Instruction {
             Instruction::St(x) => x.execute(registers, memory),
             Instruction::Sti(x) => x.execute(registers, memory),
             Instruction::Str(x) => x.execute(registers, memory),
-            _ => todo!(),
+            Instruction::Trap(x) => x.execute(registers, memory),
+            Instruction::And(x) => x.execute(registers),
         }
     }
 }

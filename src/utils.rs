@@ -1,9 +1,41 @@
-pub fn sign_extend(x: u16, bit_count: u32) -> u16 {
-    if (x >> (bit_count - 1)) & 1 == 1 {
-        x | (0xFFFF << bit_count)
-    } else {
-        x
+use std::io::Read;
+use termios::{
+    tcsetattr, Termios, BRKINT, ECHO, ICANON, ICRNL, IGNBRK, IGNCR, INLCR, ISTRIP, IXON, PARMRK,
+    TCSANOW,
+};
+
+use crate::{memory::Memory, registers::MemoryMappedReg};
+
+pub fn sign_extend(mut x: u16, bit_count: u8) -> u16 {
+    if (x >> (bit_count - 1)) & 1 != 0 {
+        x |= 0xFFFF << bit_count;
     }
+    x
+}
+
+pub fn handle_keyboard(memory: &mut Memory) {
+    let mut buffer = [0; 1];
+    std::io::stdin().read_exact(&mut buffer).unwrap();
+    if buffer[0] != 0 {
+        memory.write(MemoryMappedReg::Kbsr as u16, 1 << 15);
+        memory.write(MemoryMappedReg::Kbdr as u16, buffer[0] as u16);
+    } else {
+        memory.write(MemoryMappedReg::Kbsr as u16, 0)
+    }
+}
+
+pub const STDIN: i32 = 0;
+
+pub fn setup_terminal(termios: Termios) {
+    let mut new_termios = termios;
+    new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
+    new_termios.c_lflag &= !(ICANON | ECHO);
+
+    tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
+}
+
+pub fn restore_terminal(termios: Termios) {
+    tcsetattr(STDIN, TCSANOW, &termios).unwrap();
 }
 
 #[cfg(test)]

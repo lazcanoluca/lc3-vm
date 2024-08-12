@@ -1,21 +1,23 @@
 use crate::{
-    memory::Memory,
     registers::{Register, Registers},
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct AddImmediate {
     dr: Register,
     sr1: Register,
     imm5: u16,
 }
 
+#[derive(Debug)]
 pub struct AddRegister {
     dr: Register,
     sr1: Register,
     sr2: Register,
 }
 
+#[derive(Debug)]
 pub enum Add {
     AddImm(AddImmediate),
     AddReg(AddRegister),
@@ -38,14 +40,19 @@ impl Add {
         }
     }
 
-    pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
+    pub fn execute(&self, registers: &mut Registers) {
         match self {
             Add::AddImm(args) => {
-                registers.set(args.dr, registers.get(args.sr1) + args.imm5);
+                registers.set(args.dr, registers.get(args.sr1).wrapping_add(args.imm5));
                 registers.update_flags(args.dr);
             }
             Add::AddReg(args) => {
-                registers.set(args.dr, registers.get(args.sr1) + registers.get(args.sr2));
+                registers.set(
+                    args.dr,
+                    registers
+                        .get(args.sr1)
+                        .wrapping_add(registers.get(args.sr2)),
+                );
                 registers.update_flags(args.dr);
             }
         }
@@ -93,7 +100,6 @@ mod tests {
     #[test]
     fn test_add_immediate_execute() {
         let mut registers = Registers::default();
-        let mut memory = Memory::default();
 
         registers.set(Register::R1, 5);
 
@@ -103,7 +109,7 @@ mod tests {
             imm5: 10,
         });
 
-        instruction.execute(&mut registers, &mut memory);
+        instruction.execute(&mut registers);
 
         assert_eq!(registers.get(Register::R0), 15);
     }
@@ -111,7 +117,6 @@ mod tests {
     #[test]
     fn test_add_register_execute() {
         let mut registers = Registers::default();
-        let mut memory = Memory::default();
 
         registers.set(Register::R1, 5);
         registers.set(Register::R2, 10);
@@ -122,7 +127,7 @@ mod tests {
             sr2: Register::R2,
         });
 
-        instruction.execute(&mut registers, &mut memory);
+        instruction.execute(&mut registers);
 
         assert_eq!(registers.get(Register::R0), 15);
     }

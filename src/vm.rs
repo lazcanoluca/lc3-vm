@@ -1,15 +1,17 @@
 use crate::{
     instructions::Instruction,
     memory::Memory,
-    registers::{Register, Registers},
+    registers::{CondFlag, Register, Registers},
 };
 
-pub struct VM {
+const PC_START: u16 = 0x3000;
+
+pub struct Vm {
     registers: Registers,
     memory: Memory,
 }
 
-impl VM {
+impl Vm {
     pub fn new(registers: Registers, memory: Memory) -> Self {
         Self { registers, memory }
     }
@@ -22,6 +24,9 @@ impl VM {
     }
 
     pub fn instruction_cycle(&mut self) {
+        self.registers.set(Register::PC, PC_START);
+        self.registers.set(Register::COND, CondFlag::ZRO as u16);
+
         loop {
             // 1. Fetch
             let bits = self.fetch();
@@ -50,7 +55,7 @@ mod tests {
         let i2 = 0b0001_000_000_0_00_000;
         memory.write(0x3001, i2);
 
-        let mut vm = VM::new(registers, memory);
+        let mut vm = Vm::new(registers, memory);
 
         assert_eq!(vm.registers.get(Register::PC), 0x3000);
         let fetched = vm.fetch();

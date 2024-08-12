@@ -1,11 +1,56 @@
-mod constants;
+use std::{env, fs::File, io::BufReader, process::exit};
+
+use byteorder::{BigEndian, ReadBytesExt};
+use memory::Memory;
+use registers::Registers;
+
+use termios::Termios;
+use utils::{restore_terminal, setup_terminal, STDIN};
+use vm::Vm;
+
 mod instructions;
 mod memory;
 mod opcodes;
 mod registers;
+mod traps;
 mod utils;
 mod vm;
 
 fn main() {
-    println!("Hello, world!");
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        println!("Usage: cargo run [image-file1] ...\n");
+        exit(2);
+    }
+
+    let mut memory = Memory::default();
+
+    for arg in args[1..].iter() {
+        let f = File::open(arg).unwrap_or_else(|_| panic!("couldn't open: {}", arg));
+        let mut f = BufReader::new(f);
+
+        let base_addr = f
+            .read_u16::<BigEndian>()
+            .expect("error reading base address");
+
+        let mut addr = base_addr;
+
+        while let Ok(bits) = f.read_u16::<BigEndian>() {
+            memory.write(addr, bits);
+            addr += 1;
+        }
+    }
+
+    let registers = Registers::default();
+
+    let mut vm = Vm::new(registers, memory);
+
+    let termios = Termios::from_fd(STDIN).unwrap();
+
+    setup_terminal(termios);
+
+    vm.instruction_cycle();
+
+    restore_terminal(termios);
 }

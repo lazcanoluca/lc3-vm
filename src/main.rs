@@ -1,9 +1,4 @@
-use std::{
-    env,
-    fs::File,
-    io::{self, BufReader},
-    process::exit,
-};
+use std::{env, fs::File, io::BufReader, process::exit};
 
 use byteorder::{BigEndian, ReadBytesExt};
 use memory::Memory;
@@ -41,21 +36,9 @@ fn main() {
 
         let mut addr = base_addr;
 
-        loop {
-            match f.read_u16::<BigEndian>() {
-                Ok(bits) => {
-                    memory.write(addr, bits);
-                    addr += 1;
-                }
-                Err(e) => {
-                    if e.kind() == io::ErrorKind::UnexpectedEof {
-                        println!("program loaded successfully")
-                    } else {
-                        println!("failed loading program: {}", e)
-                    }
-                    break;
-                }
-            }
+        while let Ok(bits) = f.read_u16::<BigEndian>() {
+            memory.write(addr, bits);
+            addr += 1;
         }
     }
 

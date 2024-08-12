@@ -1,5 +1,6 @@
 use crate::registers::{Register, Registers};
 
+#[derive(Debug)]
 pub struct Jmp {
     base_r: Register,
 }

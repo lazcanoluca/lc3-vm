@@ -3,14 +3,17 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct JsrOffset {
     pc_offset11: u16,
 }
 
+#[derive(Debug)]
 pub struct JsrRegister {
     base_r: Register,
 }
 
+#[derive(Debug)]
 pub enum Jsr {
     JsrOffset(JsrOffset),
     JsrRegister(JsrRegister),
@@ -36,19 +39,22 @@ impl Jsr {
 
         match self {
             Jsr::JsrOffset(args) => {
-                registers.set(Register::PC, registers.get(Register::PC) + args.pc_offset11);
+                registers.set(
+                    Register::PC,
+                    registers.get(Register::PC).wrapping_add(args.pc_offset11),
+                );
             }
             Jsr::JsrRegister(args) => {
                 registers.set(Register::PC, registers.get(args.base_r));
             }
         }
+
+        registers.set(Register::R7, temp);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::registers;
-
     use super::*;
 
     #[test]

@@ -4,6 +4,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct Ld {
     dr: Register,
     pc_offset9: u16,
@@ -18,7 +19,7 @@ impl Ld {
     }
 
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
-        let val = memory.read(registers.get(Register::PC) + self.pc_offset9);
+        let val = memory.read(registers.get(Register::PC).wrapping_add(self.pc_offset9));
         registers.set(self.dr, val);
         registers.update_flags(self.dr);
     }

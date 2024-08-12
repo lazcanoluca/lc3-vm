@@ -4,6 +4,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct Sti {
     sr: Register,
     pc_offset9: u16,
@@ -19,8 +20,11 @@ impl Sti {
 
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         let val = registers.get(self.sr);
+        let inner = memory.read(registers.get(Register::PC).wrapping_add(self.pc_offset9));
+
         memory.write(
-            memory.read(registers.get(Register::PC) + self.pc_offset9),
+            inner,
+            // memory.read(registers.get(Register::PC).wrapping_add(self.pc_offset9)),
             val,
         );
     }

@@ -3,6 +3,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct Br {
     n: bool,
     z: bool,
@@ -16,7 +17,7 @@ impl Br {
         let z = (bits >> 10) & 0b1 == 1;
         let p = (bits >> 9) & 0b1 == 1;
 
-        let pc_offset9 = sign_extend(bits & 0b0000_0000_1111_1111, 9);
+        let pc_offset9 = sign_extend(bits & 0b0000_0001_1111_1111, 9);
 
         Self {
             n,
@@ -38,7 +39,10 @@ impl Br {
 
         // If the branch condition is satisfied, or branch unconditional.
         if branch || !(self.n || self.p || self.z) {
-            registers.set(Register::PC, registers.get(Register::PC) + self.pc_offset9);
+            registers.set(
+                Register::PC,
+                registers.get(Register::PC).wrapping_add(self.pc_offset9),
+            );
         }
     }
 }

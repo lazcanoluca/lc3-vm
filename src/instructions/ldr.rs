@@ -4,6 +4,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct Ldr {
     dr: Register,
     base_r: Register,

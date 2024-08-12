@@ -3,6 +3,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct Lea {
     dr: Register,
     pc_offset9: u16,
@@ -23,8 +24,6 @@ impl Lea {
 
 #[cfg(test)]
 mod tests {
-    use crate::{instructions, registers};
-
     use super::*;
 
     #[test]

@@ -4,18 +4,21 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct AddImmediate {
     dr: Register,
     sr1: Register,
     imm5: u16,
 }
 
+#[derive(Debug)]
 pub struct AddRegister {
     dr: Register,
     sr1: Register,
     sr2: Register,
 }
 
+#[derive(Debug)]
 pub enum Add {
     AddImm(AddImmediate),
     AddReg(AddRegister),
@@ -41,11 +44,16 @@ impl Add {
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         match self {
             Add::AddImm(args) => {
-                registers.set(args.dr, registers.get(args.sr1) + args.imm5);
+                registers.set(args.dr, registers.get(args.sr1).wrapping_add(args.imm5));
                 registers.update_flags(args.dr);
             }
             Add::AddReg(args) => {
-                registers.set(args.dr, registers.get(args.sr1) + registers.get(args.sr2));
+                registers.set(
+                    args.dr,
+                    registers
+                        .get(args.sr1)
+                        .wrapping_add(registers.get(args.sr2)),
+                );
                 registers.update_flags(args.dr);
             }
         }

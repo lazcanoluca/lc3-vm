@@ -4,6 +4,7 @@ use crate::{
     utils::sign_extend,
 };
 
+#[derive(Debug)]
 pub struct St {
     sr: Register,
     pc_offset9: u16,
@@ -19,7 +20,10 @@ impl St {
 
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         let val = registers.get(self.sr);
-        memory.write(registers.get(Register::PC) + self.pc_offset9, val);
+        memory.write(
+            registers.get(Register::PC).wrapping_add(self.pc_offset9),
+            val,
+        );
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::registers::{Register, Registers};
 
+#[derive(Debug)]
 pub struct Not {
     dr: Register,
     sr: Register,
@@ -15,6 +16,7 @@ impl Not {
 
     pub fn execute(&self, registers: &mut Registers) {
         registers.set(self.dr, !registers.get(self.sr));
+        registers.update_flags(self.dr);
     }
 }
 

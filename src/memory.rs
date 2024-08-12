@@ -17,10 +17,6 @@ impl Memory {
     pub fn write(&mut self, addr: u16, data: u16) {
         self.memory[addr as usize] = data;
     }
-
-    pub fn size() -> u16 {
-        MEMORY_MAX
-    }
 }
 
 impl Default for Memory {

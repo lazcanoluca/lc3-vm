@@ -92,7 +92,7 @@ impl Registers {
     }
 }
 
-enum CondFlag {
+pub enum CondFlag {
     POS = 1 << 0 as u16,
     ZRO = 1 << 1 as u16,
     NEG = 1 << 2 as u16,

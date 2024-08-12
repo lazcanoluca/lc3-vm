@@ -1,7 +1,6 @@
-use crate::{
-    constants::MEMORY_MAX,
-    utils::{handle_keyboard, MemoryMappedReg},
-};
+use crate::utils::{handle_keyboard, MemoryMappedReg};
+
+pub const MEMORY_MAX: u16 = u16::MAX;
 
 pub struct Memory {
     memory: [u16; MEMORY_MAX as usize + 1],
@@ -17,6 +16,10 @@ impl Memory {
 
     pub fn write(&mut self, addr: u16, data: u16) {
         self.memory[addr as usize] = data;
+    }
+
+    pub fn size() -> u16 {
+        MEMORY_MAX
     }
 }
 

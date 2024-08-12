@@ -73,7 +73,7 @@ impl Instruction {
 
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         match self {
-            Instruction::Add(x) => x.execute(registers, memory),
+            Instruction::Add(x) => x.execute(registers),
             Instruction::Br(x) => x.execute(registers),
             Instruction::Jmp(x) => x.execute(registers),
             Instruction::Jsr(x) => x.execute(registers),

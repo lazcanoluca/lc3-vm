@@ -1,5 +1,4 @@
 use crate::{
-    memory::Memory,
     registers::{Register, Registers},
     utils::sign_extend,
 };
@@ -41,7 +40,7 @@ impl Add {
         }
     }
 
-    pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
+    pub fn execute(&self, registers: &mut Registers) {
         match self {
             Add::AddImm(args) => {
                 registers.set(args.dr, registers.get(args.sr1).wrapping_add(args.imm5));
@@ -101,7 +100,6 @@ mod tests {
     #[test]
     fn test_add_immediate_execute() {
         let mut registers = Registers::default();
-        let mut memory = Memory::default();
 
         registers.set(Register::R1, 5);
 
@@ -111,7 +109,7 @@ mod tests {
             imm5: 10,
         });
 
-        instruction.execute(&mut registers, &mut memory);
+        instruction.execute(&mut registers);
 
         assert_eq!(registers.get(Register::R0), 15);
     }
@@ -119,7 +117,6 @@ mod tests {
     #[test]
     fn test_add_register_execute() {
         let mut registers = Registers::default();
-        let mut memory = Memory::default();
 
         registers.set(Register::R1, 5);
         registers.set(Register::R2, 10);
@@ -130,7 +127,7 @@ mod tests {
             sr2: Register::R2,
         });
 
-        instruction.execute(&mut registers, &mut memory);
+        instruction.execute(&mut registers);
 
         assert_eq!(registers.get(Register::R0), 15);
     }

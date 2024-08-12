@@ -14,7 +14,6 @@ use termios::{
 };
 use vm::Vm;
 
-mod constants;
 mod instructions;
 mod memory;
 mod opcodes;
@@ -26,11 +25,11 @@ mod vm;
 const STDIN: i32 = 0;
 
 fn setup_terminal(termios: Termios) {
-    let mut new_termios = termios.clone();
+    let mut new_termios = termios;
     new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
     new_termios.c_lflag &= !(ICANON | ECHO);
 
-    tcsetattr(STDIN, TCSANOW, &mut new_termios).unwrap();
+    tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
 }
 
 fn restore_terminal(termios: Termios) {
@@ -48,14 +47,14 @@ fn main() {
     let mut memory = Memory::default();
 
     for arg in args[1..].iter() {
-        let f = File::open(&arg).expect(&format!("couldn't open: {}", arg));
+        let f = File::open(arg).unwrap_or_else(|_| panic!("couldn't open: {}", arg));
         let mut f = BufReader::new(f);
 
         let base_addr = f
             .read_u16::<BigEndian>()
             .expect("error reading base address");
 
-        let mut addr = base_addr.into();
+        let mut addr = base_addr;
 
         loop {
             match f.read_u16::<BigEndian>() {

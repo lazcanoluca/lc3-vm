@@ -1,5 +1,4 @@
 use crate::{
-    constants::MEMORY_MAX,
     instructions::Instruction,
     memory::Memory,
     registers::{CondFlag, Register, Registers},
@@ -26,7 +25,7 @@ impl Vm {
         self.registers.set(Register::PC, 0x3000);
         self.registers.set(Register::COND, CondFlag::ZRO as u16);
 
-        while self.registers.get(Register::PC) < MEMORY_MAX {
+        loop {
             // 1. Fetch
             let bits = self.fetch();
             // 2. Decode

@@ -94,9 +94,9 @@ impl Registers {
 
 #[derive(PartialEq)]
 pub enum CondFlag {
-    POS = 1 << 0 as u16,
-    ZRO = 1 << 1 as u16,
-    NEG = 1 << 2 as u16,
+    POS = 1 << 0,
+    ZRO = 1 << 1,
+    NEG = 1 << 2,
 }
 
 impl TryFrom<u16> for CondFlag {

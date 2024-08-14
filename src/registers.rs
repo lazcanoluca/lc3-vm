@@ -37,7 +37,7 @@ pub enum MemoryMappedReg {
     Kbdr = 0xFE02,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Registers {
     r0: u16,
     r1: u16,

@@ -12,11 +12,14 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(registers: Registers, memory: Memory) -> Self {
+    pub fn new(mut registers: Registers, memory: Memory) -> Self {
+        registers.set(Register::PC, PC_START);
+        registers.set(Register::COND, CondFlag::ZRO as u16);
+
         Self { registers, memory }
     }
 
-    fn fetch(&mut self) -> u16 {
+    fn fetch_next_instruction(&mut self) -> u16 {
         let mar = self.registers.get(Register::PC);
         self.registers.program_counter_increment();
 
@@ -24,11 +27,8 @@ impl Vm {
     }
 
     pub fn run(&mut self) {
-        self.registers.set(Register::PC, PC_START);
-        self.registers.set(Register::COND, CondFlag::ZRO as u16);
-
         while let InstructionType::Continue(instruction) =
-            Instruction::try_from_bits(self.fetch()).unwrap()
+            Instruction::try_from_bits(self.fetch_next_instruction()).unwrap()
         {
             instruction.execute(&mut self.registers, &mut self.memory);
         }
@@ -55,7 +55,7 @@ mod tests {
         let mut vm = Vm::new(registers, memory);
 
         assert_eq!(vm.registers.get(Register::PC), 0x3000);
-        let fetched = vm.fetch();
+        let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i1);
         assert_eq!(vm.registers.get(Register::PC), 0x3001);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
@@ -65,7 +65,7 @@ mod tests {
             InstructionType::Halt => panic!("halted"),
         }
         assert_eq!(vm.registers.get(Register::R0), 1);
-        let fetched = vm.fetch();
+        let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i2);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
         match instruction {

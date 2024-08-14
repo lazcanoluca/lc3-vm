@@ -60,12 +60,18 @@ mod tests {
         assert_eq!(vm.registers.get(Register::PC), 0x3001);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
         assert_eq!(vm.registers.get(Register::R0), 0);
-        instruction.execute(&mut vm.registers, &mut vm.memory);
+        match instruction {
+            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
+            InstructionType::Halt => panic!("halted"),
+        }
         assert_eq!(vm.registers.get(Register::R0), 1);
         let fetched = vm.fetch();
         assert_eq!(fetched, i2);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
-        instruction.execute(&mut vm.registers, &mut vm.memory);
+        match instruction {
+            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
+            InstructionType::Halt => panic!("halted"),
+        }
         assert_eq!(vm.registers.get(Register::R0), 2);
     }
 }

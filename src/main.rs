@@ -1,12 +1,14 @@
 use std::{fs::File, io::BufReader, path::PathBuf};
+use termios::{
+    tcsetattr, Termios, BRKINT, ECHO, ICANON, ICRNL, IGNBRK, IGNCR, INLCR, ISTRIP, IXON, PARMRK,
+    TCSANOW,
+};
 
 use byteorder::{BigEndian, ReadBytesExt};
 use clap::{value_parser, Arg, Command};
 use memory::Memory;
 use registers::Registers;
 
-use termios::Termios;
-use utils::{restore_terminal, setup_terminal, STDIN};
 use vm::Vm;
 
 mod instructions;
@@ -27,6 +29,30 @@ fn load_memory_from_file(memory: &mut Memory, file: File) {
     while let Ok(bits) = file.read_u16::<BigEndian>() {
         memory.write(addr, bits);
         addr = addr.checked_add(1).expect("file too large");
+    }
+}
+
+pub const STDIN: i32 = 0;
+
+struct TermiosHandler(Termios);
+
+impl TermiosHandler {
+    pub fn new(termios: Termios) -> TermiosHandler {
+        println!("terminal settings modified");
+        let mut new_termios = termios;
+        new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
+        new_termios.c_lflag &= !(ICANON | ECHO);
+
+        tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
+
+        TermiosHandler(termios)
+    }
+}
+
+impl Drop for TermiosHandler {
+    fn drop(&mut self) {
+        println!("terminal settings restored");
+        tcsetattr(STDIN, TCSANOW, &self.0).unwrap();
     }
 }
 
@@ -53,11 +79,11 @@ fn main() {
     let mut vm = Vm::new(registers, memory);
 
     let termios = Termios::from_fd(STDIN).unwrap();
-    setup_terminal(termios);
 
-    vm.run();
-
-    restore_terminal(termios);
+    {
+        let _ = TermiosHandler::new(termios);
+        vm.run();
+    }
 
     println!("execution finished ok");
 }

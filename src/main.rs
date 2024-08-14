@@ -55,7 +55,9 @@ fn main() {
     let termios = Termios::from_fd(STDIN).unwrap();
     setup_terminal(termios);
 
-    vm.instruction_cycle();
+    vm.run();
 
     restore_terminal(termios);
+
+    println!("execution finished ok");
 }

@@ -28,7 +28,7 @@ pub use sti::Sti;
 pub use str::Str;
 pub use trap::Trap;
 
-use crate::{memory::Memory, opcodes::Opcode, registers::Registers};
+use crate::{memory::Memory, opcodes::Opcode, registers::Registers, traps::TrapCode};
 
 #[derive(Debug)]
 pub enum Instruction {
@@ -48,27 +48,37 @@ pub enum Instruction {
     And(And),
 }
 
+pub enum InstructionType<T> {
+    Continue(T),
+    Halt,
+}
+
 impl Instruction {
-    pub fn try_from_bits(bits: u16) -> Result<Self, String> {
+    pub fn try_from_bits(bits: u16) -> Result<InstructionType<Self>, String> {
         let opcode = Opcode::try_from(bits).unwrap();
 
-        match opcode {
-            Opcode::ADD => Ok(Self::Add(Add::from_bits(bits))),
-            Opcode::BR => Ok(Self::Br(Br::from_bits(bits))),
-            Opcode::JMP => Ok(Self::Jmp(Jmp::from_bits(bits))),
-            Opcode::JSR => Ok(Self::Jsr(Jsr::from_bits(bits))),
-            Opcode::LD => Ok(Self::Ld(Ld::from_bits(bits))),
-            Opcode::LDI => Ok(Self::Ldi(Ldi::from_bits(bits))),
-            Opcode::LDR => Ok(Self::Ldr(Ldr::from_bits(bits))),
-            Opcode::LEA => Ok(Self::Lea(Lea::from_bits(bits))),
-            Opcode::NOT => Ok(Self::Not(Not::from_bits(bits))),
-            Opcode::ST => Ok(Self::St(St::from_bits(bits))),
-            Opcode::STI => Ok(Self::Sti(Sti::from_bits(bits))),
-            Opcode::STR => Ok(Self::Str(Str::from_bits(bits))),
-            Opcode::TRAP => Ok(Self::Trap(Trap::from_bits(bits))),
-            Opcode::AND => Ok(Self::And(And::from_bits(bits))),
+        let instruction = match opcode {
+            Opcode::ADD => InstructionType::Continue(Self::Add(Add::from_bits(bits))),
+            Opcode::BR => InstructionType::Continue(Self::Br(Br::from_bits(bits))),
+            Opcode::JMP => InstructionType::Continue(Self::Jmp(Jmp::from_bits(bits))),
+            Opcode::JSR => InstructionType::Continue(Self::Jsr(Jsr::from_bits(bits))),
+            Opcode::LD => InstructionType::Continue(Self::Ld(Ld::from_bits(bits))),
+            Opcode::LDI => InstructionType::Continue(Self::Ldi(Ldi::from_bits(bits))),
+            Opcode::LDR => InstructionType::Continue(Self::Ldr(Ldr::from_bits(bits))),
+            Opcode::LEA => InstructionType::Continue(Self::Lea(Lea::from_bits(bits))),
+            Opcode::NOT => InstructionType::Continue(Self::Not(Not::from_bits(bits))),
+            Opcode::ST => InstructionType::Continue(Self::St(St::from_bits(bits))),
+            Opcode::STI => InstructionType::Continue(Self::Sti(Sti::from_bits(bits))),
+            Opcode::STR => InstructionType::Continue(Self::Str(Str::from_bits(bits))),
+            Opcode::TRAP => match Trap::from_bits(bits) {
+                trap if trap.trap_code == TrapCode::HALT => InstructionType::Halt,
+                trap => InstructionType::Continue(Self::Trap(trap)),
+            },
+            Opcode::AND => InstructionType::Continue(Self::And(And::from_bits(bits))),
             _ => todo!(),
-        }
+        };
+
+        Ok(instruction)
     }
 
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {

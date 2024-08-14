@@ -1,5 +1,5 @@
 use crate::{
-    instructions::Instruction,
+    instructions::{Instruction, InstructionType},
     memory::Memory,
     registers::{CondFlag, Register, Registers},
 };
@@ -23,16 +23,13 @@ impl Vm {
         self.memory.read(mar)
     }
 
-    pub fn instruction_cycle(&mut self) {
+    pub fn run(&mut self) {
         self.registers.set(Register::PC, PC_START);
         self.registers.set(Register::COND, CondFlag::ZRO as u16);
 
-        loop {
-            // 1. Fetch
-            let bits = self.fetch();
-            // 2. Decode
-            let instruction = Instruction::try_from_bits(bits).unwrap();
-            // 3. Execute
+        while let InstructionType::Continue(instruction) =
+            Instruction::try_from_bits(self.fetch()).unwrap()
+        {
             instruction.execute(&mut self.registers, &mut self.memory);
         }
     }

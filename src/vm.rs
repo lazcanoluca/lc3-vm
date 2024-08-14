@@ -46,6 +46,7 @@ mod tests {
 
         let mut memory = Memory::default();
         // ADD  R0, R0, 1
+        #[allow(clippy::unusual_byte_groupings)]
         let i1 = 0b0001_000_000_1_00001;
         memory.write(0x3000, i1);
         // ADD  R0, R0, R0

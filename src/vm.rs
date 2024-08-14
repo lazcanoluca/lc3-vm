@@ -1,5 +1,5 @@
 use crate::{
-    instructions::Instruction,
+    instructions::{Instruction, InstructionType},
     memory::Memory,
     registers::{CondFlag, Register, Registers},
 };
@@ -12,27 +12,24 @@ pub struct Vm {
 }
 
 impl Vm {
-    pub fn new(registers: Registers, memory: Memory) -> Self {
+    pub fn new(mut registers: Registers, memory: Memory) -> Self {
+        registers.set(Register::PC, PC_START);
+        registers.set(Register::COND, CondFlag::ZRO as u16);
+
         Self { registers, memory }
     }
 
-    fn fetch(&mut self) -> u16 {
+    fn fetch_next_instruction(&mut self) -> u16 {
         let mar = self.registers.get(Register::PC);
         self.registers.program_counter_increment();
 
         self.memory.read(mar)
     }
 
-    pub fn instruction_cycle(&mut self) {
-        self.registers.set(Register::PC, PC_START);
-        self.registers.set(Register::COND, CondFlag::ZRO as u16);
-
-        loop {
-            // 1. Fetch
-            let bits = self.fetch();
-            // 2. Decode
-            let instruction = Instruction::try_from_bits(bits).unwrap();
-            // 3. Execute
+    pub fn run(&mut self) {
+        while let InstructionType::Continue(instruction) =
+            Instruction::try_from_bits(self.fetch_next_instruction()).unwrap()
+        {
             instruction.execute(&mut self.registers, &mut self.memory);
         }
     }
@@ -49,6 +46,7 @@ mod tests {
 
         let mut memory = Memory::default();
         // ADD  R0, R0, 1
+        #[allow(clippy::unusual_byte_groupings)]
         let i1 = 0b0001_000_000_1_00001;
         memory.write(0x3000, i1);
         // ADD  R0, R0, R0
@@ -58,17 +56,23 @@ mod tests {
         let mut vm = Vm::new(registers, memory);
 
         assert_eq!(vm.registers.get(Register::PC), 0x3000);
-        let fetched = vm.fetch();
+        let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i1);
         assert_eq!(vm.registers.get(Register::PC), 0x3001);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
         assert_eq!(vm.registers.get(Register::R0), 0);
-        instruction.execute(&mut vm.registers, &mut vm.memory);
+        match instruction {
+            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
+            InstructionType::Halt => panic!("halted"),
+        }
         assert_eq!(vm.registers.get(Register::R0), 1);
-        let fetched = vm.fetch();
+        let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i2);
         let instruction = Instruction::try_from_bits(fetched).unwrap();
-        instruction.execute(&mut vm.registers, &mut vm.memory);
+        match instruction {
+            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
+            InstructionType::Halt => panic!("halted"),
+        }
         assert_eq!(vm.registers.get(Register::R0), 2);
     }
 }

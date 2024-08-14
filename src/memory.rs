@@ -1,9 +1,9 @@
 use crate::{registers::MemoryMappedReg, utils::handle_keyboard};
 
-pub const MEMORY_MAX: u16 = u16::MAX;
+pub const MEMORY_SIZE: usize = 0x10000;
 
 pub struct Memory {
-    memory: [u16; MEMORY_MAX as usize + 1],
+    memory: [u16; MEMORY_SIZE],
 }
 
 impl Memory {
@@ -22,7 +22,7 @@ impl Memory {
 impl Default for Memory {
     fn default() -> Self {
         Self {
-            memory: [0; MEMORY_MAX as usize + 1],
+            memory: [0; MEMORY_SIZE],
         }
     }
 }
@@ -35,7 +35,7 @@ mod tests {
     fn test_default_memory() {
         let memory = Memory::default();
 
-        assert_eq!(memory.memory.len(), MEMORY_MAX as usize + 1);
+        assert_eq!(memory.memory.len(), MEMORY_SIZE);
     }
 
     #[test]

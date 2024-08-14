@@ -11,7 +11,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Trap {
-    trap_code: TrapCode,
+    pub trap_code: TrapCode,
 }
 
 impl Trap {

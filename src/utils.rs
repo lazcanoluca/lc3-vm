@@ -1,8 +1,4 @@
 use std::io::Read;
-use termios::{
-    tcsetattr, Termios, BRKINT, ECHO, ICANON, ICRNL, IGNBRK, IGNCR, INLCR, ISTRIP, IXON, PARMRK,
-    TCSANOW,
-};
 
 use crate::{memory::Memory, registers::MemoryMappedReg};
 
@@ -22,20 +18,6 @@ pub fn handle_keyboard(memory: &mut Memory) {
     } else {
         memory.write(MemoryMappedReg::Kbsr as u16, 0)
     }
-}
-
-pub const STDIN: i32 = 0;
-
-pub fn setup_terminal(termios: Termios) {
-    let mut new_termios = termios;
-    new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
-    new_termios.c_lflag &= !(ICANON | ECHO);
-
-    tcsetattr(STDIN, TCSANOW, &new_termios).unwrap();
-}
-
-pub fn restore_terminal(termios: Termios) {
-    tcsetattr(STDIN, TCSANOW, &termios).unwrap();
 }
 
 #[cfg(test)]

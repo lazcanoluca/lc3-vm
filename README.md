@@ -29,6 +29,8 @@ cargo run images/2048.obj
 - Better indexing of registers. No need to always do `.get()`, can acceso directly `registers.r0`
 - Wrapping add tests
 - Documentation
+- Implement `Index` and `IndexMut` for `Memory` access
+- Cond flags as enum
 
 ## Credits
 - Meiners, J. and Pendleton, R. (no date) Write your Own Virtual Mach, Write your own virtual machine. Available at: https://www.jmeiners.com/lc3-vm/ (Accessed: 12 August 2024). 

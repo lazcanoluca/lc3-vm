@@ -1,3 +1,7 @@
+use std::{fs::File, io::BufReader};
+
+use byteorder::{BigEndian, ReadBytesExt};
+
 use crate::{registers::MemoryMappedReg, utils::handle_keyboard};
 
 pub const MEMORY_SIZE: usize = 0x10000;
@@ -16,6 +20,23 @@ impl Memory {
 
     pub fn write(&mut self, addr: u16, data: u16) {
         self.memory[addr as usize] = data;
+    }
+
+    pub fn from_file(file: File) -> Self {
+        let mut file: BufReader<File> = BufReader::new(file);
+
+        let mut memory = Memory::default();
+
+        let mut addr = file
+            .read_u16::<BigEndian>()
+            .expect("error reading base address");
+
+        while let Ok(bits) = file.read_u16::<BigEndian>() {
+            memory.write(addr, bits);
+            addr = addr.checked_add(1).expect("file too large");
+        }
+
+        memory
     }
 }
 

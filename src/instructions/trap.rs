@@ -1,4 +1,5 @@
 use std::{
+    char,
     io::{self, Read, Write},
     process,
 };
@@ -31,16 +32,16 @@ impl Trap {
                 registers.set(Register::R0, buffer[0] as u16);
             }
             TrapCode::OUT => {
-                let c = registers.get(Register::R0) as u8;
-                print!("{}", c as char);
+                let c = char::from((registers.get(Register::R0) & 0xff) as u8);
+                print!("{}", c);
             }
             TrapCode::PUTS => {
                 let mut index = registers.get(Register::R0);
-                let mut c = memory.read(index);
+                let mut c = (memory.read(index) & 0xff) as u8;
                 while c != 0x0000 {
-                    print!("{}", (c as u8) as char);
+                    print!("{}", c as char);
                     index += 1;
-                    c = memory.read(index);
+                    c = (memory.read(index) & 0xff) as u8;
                 }
                 io::stdout().flush().expect("failed to flush");
             }

@@ -12,6 +12,7 @@ pub fn sign_extend(mut x: u16, bit_count: u8) -> u16 {
 pub fn handle_keyboard(memory: &mut Memory) {
     let mut buffer = [0; 1];
     std::io::stdin().read_exact(&mut buffer).unwrap();
+
     if buffer[0] != 0 {
         memory.write(MemoryMappedReg::Kbsr as u16, 1 << 15);
         memory.write(MemoryMappedReg::Kbdr as u16, buffer[0] as u16);

@@ -22,11 +22,7 @@ impl Sti {
         let val = registers.get(self.sr);
         let inner = memory.read(registers.get(Register::PC).wrapping_add(self.pc_offset9));
 
-        memory.write(
-            inner,
-            // memory.read(registers.get(Register::PC).wrapping_add(self.pc_offset9)),
-            val,
-        );
+        memory.write(inner, val);
     }
 }
 

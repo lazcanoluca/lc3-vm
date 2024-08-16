@@ -3,24 +3,38 @@ An LC-3 virtual machine written in Rust, based on [Write your Own Virtual Machin
 
 ## Usage
 
-1. Clone the repository.
+1. `just build` to build and install the binary, or manually use `cargo`.
 
 2. Run:
 
+    - For help:
+
+    ```sh
+    lc3-vm -h
+    ```
+
+    - With an object file:
+
+    ```sh
+    lc3-vm -i <path-to-obj>
+    ```
+
+## Justfile
+
+Build and install binary:
+
 ```sh
-cargo run <image-file>
+just build
 ```
 
-Two example images are provided, to run:
+Alternatively, you can directly run the "2048" and "rogue" examples with:
 
 ```sh
-cargo run images/rogue.obj
+just run-2048
 ```
 
-and
-
 ```sh
-cargo run images/2048.obj
+just run-rogue
 ```
 
 ## TODO

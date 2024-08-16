@@ -55,7 +55,7 @@ pub enum InstructionType<T> {
 
 impl Instruction {
     pub fn try_from_bits(bits: u16) -> Result<InstructionType<Self>, String> {
-        let opcode = Opcode::try_from(bits).unwrap();
+        let opcode = Opcode::from(bits);
 
         let instruction = match opcode {
             Opcode::ADD => InstructionType::Continue(Self::Add(Add::from_bits(bits))),

@@ -48,39 +48,35 @@ pub enum Instruction {
     And(And),
 }
 
-pub enum InstructionType<T> {
-    Continue(T),
-    Halt,
-}
+impl TryFrom<u16> for Instruction {
+    type Error = String;
 
-impl Instruction {
-    pub fn try_from_bits(bits: u16) -> Result<InstructionType<Self>, String> {
+    fn try_from(bits: u16) -> Result<Self, Self::Error> {
         let opcode = Opcode::from(bits);
 
         let instruction = match opcode {
-            Opcode::ADD => InstructionType::Continue(Self::Add(Add::from_bits(bits))),
-            Opcode::BR => InstructionType::Continue(Self::Br(Br::from_bits(bits))),
-            Opcode::JMP => InstructionType::Continue(Self::Jmp(Jmp::from_bits(bits))),
-            Opcode::JSR => InstructionType::Continue(Self::Jsr(Jsr::from_bits(bits))),
-            Opcode::LD => InstructionType::Continue(Self::Ld(Ld::from_bits(bits))),
-            Opcode::LDI => InstructionType::Continue(Self::Ldi(Ldi::from_bits(bits))),
-            Opcode::LDR => InstructionType::Continue(Self::Ldr(Ldr::from_bits(bits))),
-            Opcode::LEA => InstructionType::Continue(Self::Lea(Lea::from_bits(bits))),
-            Opcode::NOT => InstructionType::Continue(Self::Not(Not::from_bits(bits))),
-            Opcode::ST => InstructionType::Continue(Self::St(St::from_bits(bits))),
-            Opcode::STI => InstructionType::Continue(Self::Sti(Sti::from_bits(bits))),
-            Opcode::STR => InstructionType::Continue(Self::Str(Str::from_bits(bits))),
-            Opcode::TRAP => match Trap::from_bits(bits) {
-                trap if trap.trap_code == TrapCode::HALT => InstructionType::Halt,
-                trap => InstructionType::Continue(Self::Trap(trap)),
-            },
-            Opcode::AND => InstructionType::Continue(Self::And(And::from_bits(bits))),
-            _ => todo!(),
+            Opcode::BR => Self::Br(Br::from_bits(bits)),
+            Opcode::ADD => Self::Add(Add::from_bits(bits)),
+            Opcode::JMP => Self::Jmp(Jmp::from_bits(bits)),
+            Opcode::JSR => Self::Jsr(Jsr::from_bits(bits)),
+            Opcode::LD => Self::Ld(Ld::from_bits(bits)),
+            Opcode::LDI => Self::Ldi(Ldi::from_bits(bits)),
+            Opcode::LDR => Self::Ldr(Ldr::from_bits(bits)),
+            Opcode::LEA => Self::Lea(Lea::from_bits(bits)),
+            Opcode::NOT => Self::Not(Not::from_bits(bits)),
+            Opcode::ST => Self::St(St::from_bits(bits)),
+            Opcode::STI => Self::Sti(Sti::from_bits(bits)),
+            Opcode::STR => Self::Str(Str::from_bits(bits)),
+            Opcode::TRAP => Self::Trap(Trap::from_bits(bits)),
+            Opcode::AND => Self::And(And::from_bits(bits)),
+            _ => unreachable!(),
         };
 
         Ok(instruction)
     }
+}
 
+impl Instruction {
     pub fn execute(&self, registers: &mut Registers, memory: &mut Memory) {
         match self {
             Instruction::Add(x) => x.execute(registers),
@@ -97,6 +93,13 @@ impl Instruction {
             Instruction::Str(x) => x.execute(registers, memory),
             Instruction::Trap(x) => x.execute(registers, memory),
             Instruction::And(x) => x.execute(registers),
+        }
+    }
+
+    pub fn is_halt(&self) -> bool {
+        match self {
+            Instruction::Trap(trap) if trap.trap_code == TrapCode::HALT => true,
+            _ => false,
         }
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    instructions::{Instruction, InstructionType},
+    instructions::Instruction,
     memory::Memory,
     registers::{CondFlag, Register, Registers},
 };
@@ -27,9 +27,13 @@ impl Vm {
     }
 
     pub fn run(&mut self) {
-        while let InstructionType::Continue(instruction) =
-            Instruction::try_from_bits(self.fetch_next_instruction()).unwrap()
-        {
+        loop {
+            let instruction = Instruction::try_from(self.fetch_next_instruction()).unwrap();
+
+            if instruction.is_halt() {
+                break;
+            }
+
             instruction.execute(&mut self.registers, &mut self.memory);
         }
     }
@@ -59,20 +63,14 @@ mod tests {
         let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i1);
         assert_eq!(vm.registers.get(Register::PC), 0x3001);
-        let instruction = Instruction::try_from_bits(fetched).unwrap();
+        let instruction = Instruction::try_from(fetched).unwrap();
         assert_eq!(vm.registers.get(Register::R0), 0);
-        match instruction {
-            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
-            InstructionType::Halt => panic!("halted"),
-        }
+        instruction.execute(&mut vm.registers, &mut vm.memory);
         assert_eq!(vm.registers.get(Register::R0), 1);
         let fetched = vm.fetch_next_instruction();
         assert_eq!(fetched, i2);
-        let instruction = Instruction::try_from_bits(fetched).unwrap();
-        match instruction {
-            InstructionType::Continue(ins) => ins.execute(&mut vm.registers, &mut vm.memory),
-            InstructionType::Halt => panic!("halted"),
-        }
+        let instruction = Instruction::try_from(fetched).unwrap();
+        instruction.execute(&mut vm.registers, &mut vm.memory);
         assert_eq!(vm.registers.get(Register::R0), 2);
     }
 }
